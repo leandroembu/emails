@@ -1,78 +1,61 @@
-# Formulário de Contato, Controller e Rotas
+# Criando o Mailer
 
-## Criar o formulário de contato
-Criar o arquivo resources/views/forms/contato.blade.php
+## Instalar drivers necessários
+Rodar o comando ```composer require guzzlehttp/guzzle```
+
+## Criar o Mailer
+Rodar o comando ```php artisan make:mail NovoContato```
+
+## Configurar o Mailer
+
+Código do arquivo app/Mail/NovoContato.php
+
+**Não se esqueça de colocar o namespace**
 ```php
-@extends('layouts.app')
-@section('content')
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="flash-message">
-                @foreach (['danger', 'warning', 'success', 'info'] as $msg)
-                    @if(Session::has('alert-' . $msg))
+<?php
 
-                    <p class="alert alert-{{ $msg }}">{{ Session::get('alert-' . $msg) }} <a href="#" class="close" data-dismiss="alert" aria-label="fechar">&times;</a></p>
-                    @endif
-                @endforeach
-            </div>
-            <div class="card card-default">
-                <div class="card-header">
-                    <h3>Contato</h3>
-                </div>
-                <div class="card-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <form method="post" action="{{ url('contato') }}">
-                        {{csrf_field()}}
-                        <div class="form-group row">
-                            <label for="nome" class="col-md-4 col-form-label text-md-right">Nome</label>
-                            <div class="col-md-6">
-                                <input id="nome" class="form-control" name="nome" type="text">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">E-mail</label>
-                            <div class="col-md-6">
-                                <input id="email" class="form-control" name="email" type="text">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="mensagem" class="col-md-4 col-form-label text-md-right">Mensagem</label>
-                            <div class="col-md-6">
-                                <textarea name="mensagem" id="mensagem" cols="30" rows="10"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Enviar
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class NovoContato extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public $nome;
+    public $email;
+    public $mensagem;
+
+    public function __construct($nome, $email, $mensagem)
+    {
+        $this->nome = $nome;
+        $this->email = $email;
+        $this->mensagem = $mensagem;
+    }
+
+    public function build()
+    {
+        return $this->from('leandroembu@gmail.com')
+                    ->subject('Mensagem enviada pelo site.')
+                    ->view('emails.contato');
+    }
+}
 ```
 
-## Criar o controller
-- Rodar o comando ``` php artisan make:controller ContatoController ```
-- Em app/Http/Controllers/ContatoController
+## Aplicar o Mailer no Controller de contato
+
+Código completo do arquivo app\Http\Controllers\ContatoController
 ```php
 <?php
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NovoContato;
 
 class ContatoController extends Controller
 {
@@ -84,24 +67,86 @@ class ContatoController extends Controller
     public function enviaEmail(Request $request)
     {
         $validacao = $request->validate([
-            'nome' => 'required',
+            'mensagem' => 'required',
             'email' => 'required|email',
             'mensagem' => 'required',
         ]);
 
-        // Implementar método aqui
-        $request->session()->flash('alert-success', 'Só falta enviarmos de verdade agora!');
+        $nome = $request->nome;
+        $email = $request->email;
+        $mensagem = $request->mensagem;
+
+        // Enviando o e-mail
+        Mail::to('leandroramos@usp.br')->send(new NovoContato($nome, $email, $mensagem));
+
+        $request->session()->flash('alert-success', 'Sua mensagem foi enviada, obrigado!');
         return redirect()->back();
     }
 }
 ```
 
-## Criar as rotas para o controller
-
-- routes/web.php
+## Criar a view da mensagem
+Criar arquivo resources/views/emails/contato.blade.php
 ```php
-// Rotas para o contato
-Route::get('contato', 'ContatoController@index');
-Route::post('contato', 'ContatoController@enviaEmail');
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mensagem enviada pelo site</title>
+    <meta charset="utf-8">
+    <style>
+        body{
+            width:510px;
+            margin:0;
+            padding:0 20px;
+            font-family:"Raleway", sans-serif;
+            font-size:12px;
+        }
+        h1{
+            font-size:20px;
+        }
+        h2{
+            font-size:16px;
+        }
+    </style>
+</head>
+<body>
+<h1>
+    Nova mensagem enviada pelo site
+</h1>
+<hr>
+<p>
+    <strong>Nome:</strong> {{$nome}}<br>
+    <strong>E-mail:</strong> {{$email}}<br>
+    <strong>Mensagem:</strong><br> <?php echo nl2br($mensagem); ?>
+</p> 
+<hr>
+<div>
+    <p>
+        <a href="http://localhost:8000" title="Editora X">
+        Editora X Ltda.
+        </a>
+        <br>
+        Av. Nova, 1265<br>
+        Cidade Fantasma – CEP 023657-110<br>
+        Cidade Nova – SP – Brasil<br>
+        Tel.: +55 11 5252-2525
+    </p>
+</div>
+</body>
+</html>  
 ```
-- Rodar a aplicação em http://localhost:8000/contato
+
+## Configurar a conta de e-mail
+No arquivo .env
+```
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=seu-email@gmail.com
+MAIL_PASSWORD=suasenha
+MAIL_ENCRYPTION=tls
+```
+
+## Referências para saber mais
+- Templates de e-mail - [Foundation for Emails](https://foundation.zurb.com/emails.html)
+- [Laravel 5.6 - Mail](https://laravel.com/docs/5.6/mail)
