@@ -1,8 +1,3 @@
-# Criando o projeto e deixando pronto para as validações
-
-## Criar o formulário de contato
-Criar o arquivo resources/views/forms/contato.blade.php
-```php
 @extends('layouts.app')
 @section('content')
     <div class="row justify-content-center">
@@ -62,46 +57,3 @@ Criar o arquivo resources/views/forms/contato.blade.php
         </div>
     </div>
 @endsection
-```
-
-## Criar o controller
-- Rodar o comando ```bash php artisan make:controller ContatoController ```
-- Em app/Http/Controllers/ContatoController
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-
-class ContatoController extends Controller
-{
-    public function index()
-    {
-        return view('forms.contato');
-    }
-
-    public function enviaEmail(Request $request)
-    {
-        $validacao = $request->validate([
-            'nome' => 'required',
-            'email' => 'required|email',
-            'mensagem' => 'required',
-        ]);
-
-        // Implementar método aqui
-        $request->session()->flash('alert-success', 'Só falta enviarmos de verdade agora!');
-        return redirect()->back();
-    }
-}
-```
-
-## Criar as rotas para o controller
-
-- routes/web.php
-```php
-// Rotas para o contato
-Route::get('contato', 'ContatoController@index');
-Route::post('contato', 'ContatoController@enviaEmail');
-```
-- Rodar a aplicação em http://localhost:8000/contato

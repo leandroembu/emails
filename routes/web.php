@@ -11,7 +11,10 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Rotas para os livros
+Route::get('/', 'LivroController@index');
 Route::resource('livros', 'LivroController');
+
+// Rotas para o contato
+Route::get('contato', 'ContatoController@index');
+Route::post('contato', 'ContatoController@enviaEmail');

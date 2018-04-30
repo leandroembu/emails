@@ -65,7 +65,7 @@ Criar o arquivo resources/views/forms/contato.blade.php
 ```
 
 ## Criar o controller
-- Rodar o comando ```bash php artisan make:controller ContatoController ```
+- Rodar o comando ```php php artisan make:controller ContatoController ```
 - Em app/Http/Controllers/ContatoController
 ```php
 <?php
