@@ -1,4 +1,4 @@
-# Criando o projeto e deixando pronto para as validações
+# Formulário de Contato, Controller e Rotas
 
 ## Criar o formulário de contato
 Criar o arquivo resources/views/forms/contato.blade.php
