@@ -146,6 +146,8 @@ MAIL_USERNAME=seu-email@gmail.com
 MAIL_PASSWORD=suasenha
 MAIL_ENCRYPTION=tls
 ```
+## TODO
+Atualizar para a versão 10 do Laravel.
 
 ## Referências para saber mais
 - Templates de e-mail - [Foundation for Emails](https://foundation.zurb.com/emails.html)
